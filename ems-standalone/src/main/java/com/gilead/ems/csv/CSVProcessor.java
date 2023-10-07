@@ -17,6 +17,10 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.gilead.ems.model.Trainee;
 
 /**
@@ -25,13 +29,18 @@ import com.gilead.ems.model.Trainee;
 public class CSVProcessor {
 
 	public List<Trainee> getAllTrainees(String fileName) throws IOException, ParseException {
+		final Logger logger = LogManager.getLogger(CSVProcessor.class);
+		BasicConfigurator.configure();
+		logger.debug("Inside getAllTrainees method");
 		List<Trainee> trainees = new ArrayList<Trainee>();
 		try (Stream<String> lines = Files.lines(Paths.get(fileName));
 				BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+			logger.debug("Read all the data from CSV");
 			List<String[]> csvData = lines.map(line -> line.split(",")) // Split each line by comma
 					.collect(Collectors.toList());
 
 			for (String[] row : csvData) {
+				logger.debug("Inside for loop "+row);
 				Trainee trainee = new Trainee();
 				Integer id = Integer.parseInt(row[0]);
 				trainee.setId(id);
@@ -46,7 +55,7 @@ public class CSVProcessor {
 				trainee.setRole(row[6]);
 				trainees.add(trainee);
 			}
-			trainees.stream().forEach(tr -> System.out.println(tr.getName()));
+			trainees.stream().forEach(tr -> logger.debug(tr.getName()));
 
 		}
 		return trainees;
