@@ -1,3 +1,4 @@
 com\gilead\ems\csv\CSVProcessor.class
-com\gilead\ems\processor\Application.class
 com\gilead\ems\model\Trainee.class
+com\gilead\ems\processor\Application.class
+com\gilead\ems\dao\TraineeDao.class
