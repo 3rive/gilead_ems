@@ -13,7 +13,7 @@ public class DBConnection {
 		Connection connection = null;
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/ems", "root", "Letmein@123");
+			connection = DriverManager.getConnection(dbUrl,userName,password);
 		}
 		 catch (Exception exception) {
 				log.error("Error occurred while saving to database " + exception.toString());
