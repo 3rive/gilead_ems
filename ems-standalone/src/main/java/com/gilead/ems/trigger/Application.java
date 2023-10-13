@@ -1,6 +1,7 @@
 package com.gilead.ems.trigger;
 
 import java.sql.Connection;
+import java.util.Properties;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.LogManager;
@@ -12,6 +13,7 @@ import com.gilead.ems.controller.TraineeInsertController;
 import com.gilead.ems.controller.TraineeReadController;
 import com.gilead.ems.controller.TraineeUpdateController;
 import com.gilead.ems.model.Trainee;
+import com.gilead.ems.util.PropertyReader;
 
 /**
  * Main class that triggers the trainee data uploading functionality
@@ -22,29 +24,37 @@ public class Application {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		String fileName = args[0];
+		String propertyfilePath = args[0];
+		Properties props = PropertyReader.loadProperties(propertyfilePath);
 		String operation = args[1];
 		String traineeId = null;
 		if(operation.equals("update")) {
 			traineeId = args[2];
-		}		
-		Connection connection = DBConnection.getConnection("jdbc:mysql://localhost:3306/ems", "root", "Letmein@123");
+		}
+		String csvfilePath = props.getProperty("csvfilepath");
+		logger.debug("CSV file Path : "+csvfilePath);
+		String dbUrl = props.getProperty("dbUrl");
+		logger.debug("DB URL : "+dbUrl);
+		String dbUser = props.getProperty("dbUser");
+		logger.debug("DB User : "+dbUser);
+		String dbPassword = props.getProperty("dbPassword");
+		logger.debug("DB Password : "+dbPassword);
+		String dbDriverClass = props.getProperty("driverClass");
+		logger.debug("DB Class : "+dbDriverClass);
+		Connection connection = DBConnection.getConnection(dbUrl,dbUser, dbPassword,dbDriverClass);
 		switch (operation) {
-		//C
 		case "insert": {
 			TraineeInsertController insertController = new TraineeInsertController();
 			logger.info("Inserting the trainee information to the database");
-			insertController.save(fileName, connection);
+			insertController.save(csvfilePath, connection);
 			break;
 		}
-		//R
 		case "read": {
 			TraineeReadController readController = new TraineeReadController();
 			logger.info("Reading the trainee information from database");
 			readController.read(connection);
 			break;
 		}
-		//U
 		case "update": {
 			TraineeUpdateController updateController = new TraineeUpdateController();
 			logger.info("Updating the trainee information in database");
@@ -54,7 +64,6 @@ public class Application {
 			updateController.update(connection, trainee);
 			break;
 		}
-		//D
 		case "delete": {
 			TraineeDeleteController deleteController = new TraineeDeleteController();
 			logger.info("Deleting the trainee information from database");
@@ -62,7 +71,7 @@ public class Application {
 			break;
 		}
 		default:
-			logger.error("The operation "+ operation+ "cannot be performed");
+			logger.error("The operation "+ operation + "cannot be performed");
 		}
 	}
 }

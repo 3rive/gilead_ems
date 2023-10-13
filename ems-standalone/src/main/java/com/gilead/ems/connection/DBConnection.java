@@ -8,11 +8,11 @@ import org.apache.log4j.Logger;
 
 public class DBConnection {
 	
-	public static Connection getConnection(String dbUrl, String userName, String password) {
+	public static Connection getConnection(String dbUrl, String userName, String password,String driverClass) {
 		final Logger log = LogManager.getLogger(DBConnection.class);
 		Connection connection = null;
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
+			Class.forName(driverClass);
 			connection = DriverManager.getConnection(dbUrl,userName,password);
 		}
 		 catch (Exception exception) {
