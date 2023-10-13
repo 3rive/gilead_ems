@@ -1,10 +1,9 @@
 package com.gilead.ems.trigger;
 
 import java.sql.Connection;
+import java.util.Calendar;
 import java.util.Properties;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.gilead.ems.connection.DBConnection;
@@ -20,10 +19,10 @@ import com.gilead.ems.util.PropertyReader;
  *
  */
 public class Application {
-	private static final Logger logger = LogManager.getLogger(Application.class);
+	private static final Logger logger = Logger.getLogger(Application.class);
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
+		long startTime = Calendar.getInstance().getTimeInMillis();
 		String propertyfilePath = args[0];
 		Properties props = PropertyReader.loadProperties(propertyfilePath);
 		String operation = args[1];
@@ -73,5 +72,8 @@ public class Application {
 		default:
 			logger.error("The operation "+ operation + "cannot be performed");
 		}
+		long endTime = Calendar.getInstance().getTimeInMillis();
+		double totalTimeTaken = (endTime - startTime)*0.001;
+		logger.debug("Total time taken for the application to process "+totalTimeTaken+ " seconds");
 	}
 }
