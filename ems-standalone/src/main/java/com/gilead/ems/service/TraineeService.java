@@ -61,4 +61,20 @@ public class TraineeService {
 		traineeDao.updateTrainee(connection,trainee);
 		
 	}
+
+	/*
+	 * service method to copy all the trainees
+	 */
+	public void copyTrainees(Connection connection,String path) {
+		TraineeDao traineeDao = new TraineeDao();
+		logger.info("Copying the trainee information");
+		traineeDao.copyToFile(connection,path);
+	}
+
+	public void countTrainees(Connection connection, String csvfilePath) {
+		TraineeDao traineeDao = new TraineeDao();
+		logger.info("Counting the trainee information");
+		traineeDao.countTrainees(connection,csvfilePath);
+		
+	}
 }

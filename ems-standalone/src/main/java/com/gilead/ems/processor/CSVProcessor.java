@@ -56,4 +56,15 @@ public class CSVProcessor {
 		return trainees;
 
 	}
+	
+	public int count(String fileName) throws IOException, ParseException {
+		List<String[]> csvData;
+		try (Stream<String> lines = Files.lines(Paths.get(fileName));
+				BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+			 csvData = lines.map(line -> line.split(",")) // Split each line by comma
+					.collect(Collectors.toList());
+		}
+		return csvData.size();
+
+	}
 }

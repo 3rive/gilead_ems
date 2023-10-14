@@ -7,6 +7,8 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import com.gilead.ems.connection.DBConnection;
+import com.gilead.ems.controller.TraineeCopyController;
+import com.gilead.ems.controller.TraineeCountController;
 import com.gilead.ems.controller.TraineeDeleteController;
 import com.gilead.ems.controller.TraineeInsertController;
 import com.gilead.ems.controller.TraineeReadController;
@@ -63,10 +65,28 @@ public class Application {
 			updateController.update(connection, trainee);
 			break;
 		}
-		case "delete": {
+		case "clear": {
 			TraineeDeleteController deleteController = new TraineeDeleteController();
 			logger.info("Deleting the trainee information from database");
-			deleteController.delete(connection);
+			deleteController.clear(connection);
+			break;
+		}
+		case "copy": {
+			TraineeCopyController copyController = new TraineeCopyController();
+			logger.info("copying the trainee information from database");
+			copyController.copy(connection,propertyfilePath);
+			break;
+		}
+		case "count": {
+			TraineeCountController countController = new TraineeCountController();
+			logger.info("Counting the trainee information from database");
+			countController.count(connection,csvfilePath);
+			break;
+		}
+		case "delete": {
+			TraineeDeleteController deleteController = new TraineeDeleteController();
+			logger.info("Deleting "+traineeId+" information from database");
+			deleteController.delete(connection,traineeId);
 			break;
 		}
 		default:

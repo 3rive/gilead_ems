@@ -1,17 +1,24 @@
 package com.gilead.ems.dao;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.gilead.ems.model.Trainee;
+import com.gilead.ems.processor.CSVProcessor;
+import com.gilead.ems.util.PropertyReader;
 
 public class TraineeDao {
 
@@ -97,4 +104,57 @@ public class TraineeDao {
 
 	}
 
+	public void copyToFile(Connection connection, String path) {
+		log.debug("inside copy method file");
+		Statement statement;
+		Properties props = PropertyReader.loadProperties(path);
+		String csvFilePath = props.getProperty("copylocation");
+		try {
+			statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery("SELECT * from sakila.trainee");
+			BufferedWriter fileWriter = new BufferedWriter(new FileWriter(csvFilePath));
+			log.debug("File processing starts");
+			fileWriter.append("id,company,name,dob,gender,doj,role");
+			fileWriter.append("\n");
+			log.debug("File header prints");
+			if (rs != null) {
+				while (rs.next()) {
+					Integer id = Integer.valueOf(rs.getInt("id"));
+					String ID = id.toString();
+					fileWriter.append(ID);
+					fileWriter.append(",");
+					fileWriter.append(rs.getString("company"));
+					fileWriter.append(",");
+					fileWriter.append(rs.getString("name"));
+					fileWriter.append(",");
+					fileWriter.append(rs.getDate("dob").toString());
+					fileWriter.append(",");
+					fileWriter.append(rs.getString("gender"));
+					fileWriter.append(",");
+					fileWriter.append(rs.getDate("doj").toString());
+					fileWriter.append(",");
+					fileWriter.append(rs.getString("role"));
+					fileWriter.append("\n");
+				}
+			}
+			fileWriter.close();
+
+		} catch (Exception exception) {
+			log.error("Error occurred while copying record from database " + exception.toString());
+		}
+	}
+
+	public void countTrainees(Connection connection, String csvfilePath) {
+		List<Trainee> traineesFromDB = readFromDB(connection);
+		log.debug("Number of trainee records from database is : " + traineesFromDB.size());
+		CSVProcessor csvProcessor = new CSVProcessor();
+		int traineesFromCSV = 0;
+		try { // will create a list of trainees from CSV file
+			traineesFromCSV = csvProcessor.count(csvfilePath);
+
+		} catch (IOException | ParseException e) {
+			log.error("Common Exception occurred " + e.toString());
+		}
+		log.debug("Number of trainee records from CSV file is : " + traineesFromCSV);
+	}
 }
