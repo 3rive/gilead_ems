@@ -36,6 +36,7 @@ public class TraineeService {
 		try { // will create a list of trainees from CSV file
 			trainees = csvProcessor.getAllTrainees(fileName);
 			TraineeDao traineeDao = new TraineeDao();
+			traineeDao.deleteFromDb(connection);
 			for (Trainee trainee : trainees) {
 				logger.info(
 						"Trainee ID " + traineeDao.saveToDB(connection, trainee) + " inserted into DB successfully");
@@ -76,5 +77,11 @@ public class TraineeService {
 		logger.info("Counting the trainee information");
 		traineeDao.countTrainees(connection,csvfilePath);
 		
+	}
+
+	public void deleteTrainee(Connection connection, String traineeId) {
+		TraineeDao traineeDao = new TraineeDao();
+		logger.info("Deleting the trainee information : "+traineeId);
+		traineeDao.deleteFromDb(connection,traineeId);		
 	}
 }

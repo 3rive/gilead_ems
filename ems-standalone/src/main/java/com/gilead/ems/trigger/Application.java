@@ -15,6 +15,7 @@ import com.gilead.ems.controller.TraineeReadController;
 import com.gilead.ems.controller.TraineeUpdateController;
 import com.gilead.ems.model.Trainee;
 import com.gilead.ems.util.PropertyReader;
+import com.gilead.ems.validation.EmsValidator;
 
 /**
  * Main class that triggers the trainee data uploading functionality
@@ -25,11 +26,12 @@ public class Application {
 
 	public static void main(String[] args) {
 		long startTime = Calendar.getInstance().getTimeInMillis();
+		EmsValidator validator = new EmsValidator();
 		String propertyfilePath = args[0];
 		Properties props = PropertyReader.loadProperties(propertyfilePath);
 		String operation = args[1];
 		String traineeId = null;
-		if(operation.equals("update")) {
+		if(operation.equals("update") || operation.equals("delete")) {
 			traineeId = args[2];
 		}
 		String csvfilePath = props.getProperty("csvfilepath");
@@ -43,55 +45,62 @@ public class Application {
 		String dbDriverClass = props.getProperty("driverClass");
 		logger.debug("DB Class : "+dbDriverClass);
 		Connection connection = DBConnection.getConnection(dbUrl,dbUser, dbPassword,dbDriverClass);
-		switch (operation) {
-		case "insert": {
-			TraineeInsertController insertController = new TraineeInsertController();
-			logger.info("Inserting the trainee information to the database");
-			insertController.save(csvfilePath, connection);
-			break;
+		if(validator.check(connection,csvfilePath)) {
+			logger.debug("Pre-checks passed !!!");
+			switch (operation) {
+			case "insert": {
+				TraineeInsertController insertController = new TraineeInsertController();
+				logger.info("Inserting the trainee information to the database");
+				insertController.save(csvfilePath, connection);
+				break;
+			}
+			case "read": {
+				TraineeReadController readController = new TraineeReadController();
+				logger.info("Reading the trainee information from database");
+				readController.read(connection);
+				break;
+			}
+			case "update": {
+				TraineeUpdateController updateController = new TraineeUpdateController();
+				logger.info("Updating the trainee information in database");
+				Trainee trainee = new Trainee();
+				trainee.setId(Integer.parseInt(traineeId));
+				trainee.setCompany("Gilead Hi-Tech");
+				updateController.update(connection, trainee);
+				break;
+			}
+			case "clear": {
+				TraineeDeleteController deleteController = new TraineeDeleteController();
+				logger.info("Deleting the trainee information from database");
+				deleteController.clear(connection);
+				break;
+			}
+			case "copy": {
+				TraineeCopyController copyController = new TraineeCopyController();
+				logger.info("copying the trainee information from database");
+				copyController.copy(connection,propertyfilePath);
+				break;
+			}
+			case "count": {
+				TraineeCountController countController = new TraineeCountController();
+				logger.info("Counting the trainee information from database");
+				countController.count(connection,csvfilePath);
+				break;
+			}
+			case "delete": {
+				TraineeDeleteController deleteController = new TraineeDeleteController();
+				logger.info("Deleting "+traineeId+" information from database");
+				deleteController.delete(connection,traineeId);
+				break;
+			}
+			default:
+				logger.error("The operation "+ operation + "cannot be performed");
+			}
 		}
-		case "read": {
-			TraineeReadController readController = new TraineeReadController();
-			logger.info("Reading the trainee information from database");
-			readController.read(connection);
-			break;
+		else {
+			logger.debug("Pre-checks failed !!!");
 		}
-		case "update": {
-			TraineeUpdateController updateController = new TraineeUpdateController();
-			logger.info("Updating the trainee information in database");
-			Trainee trainee = new Trainee();
-			trainee.setId(Integer.parseInt(traineeId));
-			trainee.setCompany("Gilead Hi-Tech");
-			updateController.update(connection, trainee);
-			break;
-		}
-		case "clear": {
-			TraineeDeleteController deleteController = new TraineeDeleteController();
-			logger.info("Deleting the trainee information from database");
-			deleteController.clear(connection);
-			break;
-		}
-		case "copy": {
-			TraineeCopyController copyController = new TraineeCopyController();
-			logger.info("copying the trainee information from database");
-			copyController.copy(connection,propertyfilePath);
-			break;
-		}
-		case "count": {
-			TraineeCountController countController = new TraineeCountController();
-			logger.info("Counting the trainee information from database");
-			countController.count(connection,csvfilePath);
-			break;
-		}
-		case "delete": {
-			TraineeDeleteController deleteController = new TraineeDeleteController();
-			logger.info("Deleting "+traineeId+" information from database");
-			deleteController.delete(connection,traineeId);
-			break;
-		}
-		default:
-			logger.error("The operation "+ operation + "cannot be performed");
-		}
+	
 		long endTime = Calendar.getInstance().getTimeInMillis();
 		double totalTimeTaken = (endTime - startTime)*0.001;
 		logger.debug("Total time taken for the application to process "+totalTimeTaken+ " seconds");

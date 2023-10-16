@@ -18,8 +18,8 @@ public class TraineeDeleteController {
 	}
 
 	public void delete(Connection connection, String traineeId) {
-		// TODO Auto-generated method stub
-		
+		TraineeService service = new TraineeService();
+		service.deleteTrainee(connection,traineeId);	
 	}
 
 }

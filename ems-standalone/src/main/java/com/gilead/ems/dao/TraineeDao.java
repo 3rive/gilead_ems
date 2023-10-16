@@ -28,7 +28,6 @@ public class TraineeDao {
 	 * DAO class to save the trainee details
 	 */
 	public String saveToDB(Connection connection, Trainee trainee) {
-
 		String name = null;
 		PreparedStatement statement;
 		try {
@@ -88,6 +87,19 @@ public class TraineeDao {
 		}
 	}
 
+	/*
+	 * DAO class to delete the trainee information
+	 */
+	public void deleteFromDb(Connection connection, String id) {
+		Statement statement;
+		try {
+			statement = connection.createStatement();
+			statement.executeUpdate("DELETE from sakila.trainee where id =" + "'" + id + "'"); // 6 records
+
+		} catch (Exception exception) {
+			log.error("Error occurred while deleting record from database " + exception.toString());
+		}
+	}
 	/*
 	 * DAO Class to update company name
 	 */
